@@ -124,7 +124,7 @@ func TestDefaultEnvVariables(t *testing.T) {
 	tests := []struct {
 		name string
 		hcl  string
-		want map[string]string
+		want map[string]cty.Value
 	}{
 		{
 			"test",
@@ -145,7 +145,7 @@ func TestDefaultEnvVariables(t *testing.T) {
 				}
 			}
 			`,
-			map[string]string{"ORIGIN": "FOO", "TIMEOUT": "42"},
+			map[string]cty.Value{"ORIGIN": cty.StringVal("FOO"), "TIMEOUT": cty.StringVal("42")},
 		},
 		{
 			"no-environment_variables-block",
@@ -159,7 +159,7 @@ func TestDefaultEnvVariables(t *testing.T) {
 
 			defaults {}
 			`,
-			map[string]string{"ORIGIN": "", "TIMEOUT": ""},
+			map[string]cty.Value{"ORIGIN": cty.NilVal, "TIMEOUT": cty.NilVal},
 		},
 		{
 			"no-defaults-block",
@@ -171,7 +171,7 @@ func TestDefaultEnvVariables(t *testing.T) {
 				}
 			}
 			`,
-			map[string]string{"ORIGIN": "", "TIMEOUT": ""},
+			map[string]cty.Value{"ORIGIN": cty.NilVal, "TIMEOUT": cty.NilVal},
 		},
 	}
 
@@ -184,19 +184,11 @@ func TestDefaultEnvVariables(t *testing.T) {
 
 			hclContext := cf.Context.Value(request.ContextType).(*eval.Context).HCLContext()
 
-			envVars := seetie.ValueToMap(hclContext.Variables["env"])
+			envVars := hclContext.Variables["env"].AsValueMap()
 			for key, expectedValue := range tt.want {
-				value, isset := envVars[key]
-				if !isset {
-					t.Errorf("Missing or unused evironment variable %q:\nWant:\t%s=%q\nGot:", key, key, expectedValue)
-				} else if value != expectedValue {
-					t.Errorf("Unexpected value for evironment variable %q:\nWant:\t%s=%q\nGot:\t%s=%q", key, key, expectedValue, key, value)
-				}
-			}
-
-			for key, value := range envVars {
-				if _, isset := tt.want[key]; !isset {
-					t.Errorf("Unexpected variable %q in evironment: \nWant:\nGot:\t%s=%q", key, key, value)
+				value := envVars[key]
+				if value != expectedValue {
+					t.Errorf("Unexpected value for evironment variable %q:\nWant:\t%s=%v\nGot:\t%s=%v", key, key, expectedValue, key, value)
 				}
 			}
 		})
