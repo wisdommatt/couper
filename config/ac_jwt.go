@@ -15,7 +15,7 @@ type Claims hcl.Expression
 
 // JWT represents the <JWT> object.
 type JWT struct {
-	AccessControlSetter
+	ErrorHandlerSetter
 	Claims             Claims              `hcl:"claims,optional"`
 	ClaimsRequired     []string            `hcl:"required_claims,optional"`
 	Cookie             string              `hcl:"cookie,optional"`

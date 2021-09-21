@@ -1,9 +1,9 @@
 package config
 
-type AccessControlSetter struct {
+type ErrorHandlerSetter struct {
 	ErrorHandler []*ErrorHandler `hcl:"error_handler,block"`
 }
 
-func (acs *AccessControlSetter) Set(ehConf *ErrorHandler) {
-	acs.ErrorHandler = append(acs.ErrorHandler, ehConf)
+func (ehs *ErrorHandlerSetter) Set(ehConf *ErrorHandler) {
+	ehs.ErrorHandler = append(ehs.ErrorHandler, ehConf)
 }
